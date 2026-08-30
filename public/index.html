@@ -14,7 +14,7 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen pb-12">
 
-  <header class="max-w-5xl mx-auto pt-6 px-4 flex justify-between items-center">
+  <header class="max-w-6xl mx-auto pt-6 px-4 flex justify-between items-center">
     <div class="flex items-center space-x-2">
       <span class="text-3xl">🏆</span>
       <h1 class="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-pink-500 bg-clip-text text-transparent">
@@ -31,14 +31,14 @@
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto mt-6 px-4">
+  <main class="max-w-6xl mx-auto mt-6 px-4">
 
     <!-- Section ผู้แข่งขัน -->
     <div id="student-view">
       <div id="screen-start" class="bg-slate-800 border border-slate-700 rounded-3xl p-8 max-w-lg mx-auto text-center shadow-2xl">
         <div class="text-6xl mb-4">📸</div>
         <h2 class="text-3xl font-bold text-white mb-2">เกมถ่ายรูปแข่งขันทำหน้าตลก</h2>
-        <p class="text-slate-400 mb-6">ถ่ายรูปทีละท่า รูปจะถูกส่งแสดงบนหน้าจอครูทันทีแบบ Real-time!</p>
+        <p class="text-slate-400 mb-6">ถ่ายรูปทีละท่า รูปจะเด้งขึ้นหน้าจอครูทันทีแบบ Real-time!</p>
         
         <input type="text" id="team-name" placeholder="ระบุชื่อทีมที่เข้าร่วมแข่งขัน..." 
                class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-5 py-4 text-center text-lg text-white focus:outline-none focus:border-indigo-500 mb-6">
@@ -56,7 +56,7 @@
             </span>
             <span id="current-team-label" class="text-amber-400 font-bold ml-2"></span>
           </div>
-          <span id="photo-status" class="text-emerald-400 font-medium text-sm hidden">✅ ส่งรูปท่านี้แล้ว!</span>
+          <span id="photo-status" class="text-emerald-400 font-medium text-sm hidden">✅ ส่งรูปภาพนี้แล้ว!</span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -90,12 +90,12 @@
       </div>
     </div>
 
-    <!-- Section ครู (Password Protected + CRUD) -->
+    <!-- Section ครู (รูปขนาดใหญ่ จัดเรียง 1-10 ชัดเจน) -->
     <div id="teacher-view" class="hidden">
       <div class="flex justify-between items-center mb-6">
         <div>
           <h2 class="text-2xl font-bold text-white flex items-center gap-2">
-            📊 แผงควบคุมและผลงานการแข่งขัน <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/30">Real-time</span>
+            📊 แผงควบคุมผลงานทีมแข่ง <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/30">Real-time Live</span>
           </h2>
         </div>
         <div class="flex gap-3">
@@ -108,7 +108,7 @@
         </div>
       </div>
 
-      <div id="teacher-gallery" class="space-y-6"></div>
+      <div id="teacher-gallery" class="space-y-10"></div>
     </div>
 
   </main>
@@ -127,7 +127,6 @@
 
   fetch('/api/targets').then(r => r.json()).then(data => targetImages = data);
 
-  // Socket.IO Listeners
   socket.on('team_updated', (team) => {
     if (!document.getElementById('teacher-view').classList.contains('hidden')) {
       renderOrUpdateTeamCard(team);
@@ -177,16 +176,15 @@
     btn.disabled = true;
 
     const ctx = canvas.getContext('2d');
-    canvas.width = 320;
-    canvas.height = 320;
+    canvas.width = 400;
+    canvas.height = 400;
 
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    const photoData = canvas.toDataURL('image/jpeg', 0.5);
+    const photoData = canvas.toDataURL('image/jpeg', 0.6);
 
-    // ส่งรูปขึ้นเซิร์ฟเวอร์ทันที
     try {
       await fetch('/api/upload-photo', {
         method: 'POST',
@@ -213,7 +211,6 @@
     document.getElementById('screen-finish').classList.remove('hidden');
   }
 
-  // ระบบตรวจสอบรหัสผ่านหน้าครู
   function switchTab(tab) {
     if (tab === 'teacher' && !isTeacherAuthenticated) {
       const pwd = prompt('🔒 กรุณากรอกรหัสผ่านสำหรับคุณครู:');
@@ -247,7 +244,7 @@
     gallery.innerHTML = '';
 
     if (results.length === 0) {
-      gallery.innerHTML = `<div id="no-team-msg" class="text-center py-12 text-slate-500">ยังไม่มีทีมส่งผลงานเข้ามา...</div>`;
+      gallery.innerHTML = `<div id="no-team-msg" class="text-center py-12 text-slate-500 text-lg">ยังไม่มีทีมส่งผลงานเข้ามา...</div>`;
     } else {
       results.forEach(team => renderOrUpdateTeamCard(team));
     }
@@ -261,30 +258,44 @@
 
     let card = document.getElementById(`team-card-${team.id}`);
     
+    // การแสดงผลรูปภาพขนาดกลาง ชัดเจน เรียงรูปที่ 1 ถึง 10 (2 แถว แถวละ 5 รูปบนจอคอม / 2 รูปบนจอมือถือ)
     const cardHTML = `
-      <div class="flex justify-between items-center mb-4">
+      <div class="flex justify-between items-center mb-5 border-b border-slate-700/60 pb-3">
         <div class="flex items-center gap-3">
-          <span class="text-xl">🏆</span>
-          <h3 class="font-bold text-lg text-white">${team.teamName}</h3>
-          <span class="text-xs text-slate-400">อัปเดตล่าสุด ${team.timestamp}</span>
+          <span class="text-2xl">🏆</span>
+          <h3 class="font-bold text-xl text-yellow-400">${team.teamName}</h3>
+          <span class="text-xs bg-slate-700 text-slate-300 px-3 py-1 rounded-full">อัปเดตล่าสุด ${team.timestamp}</span>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="editTeam(${team.id}, '${team.teamName}')" class="bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 text-xs px-3 py-1.5 rounded-lg border border-amber-500/30 transition-all">
+          <button onclick="editTeam(${team.id}, '${team.teamName}')" class="bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 text-sm px-3.5 py-1.5 rounded-xl border border-amber-500/30 transition-all flex items-center gap-1">
             ✏️ แก้ไขชื่อ
           </button>
-          <button onclick="deleteTeam(${team.id})" class="bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 text-xs px-3 py-1.5 rounded-lg border border-rose-500/30 transition-all">
-            🗑️ ลบ
+          <button onclick="deleteTeam(${team.id})" class="bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 text-sm px-3.5 py-1.5 rounded-xl border border-rose-500/30 transition-all flex items-center gap-1">
+            🗑️ ลบทีม
           </button>
         </div>
       </div>
-      <div class="grid grid-cols-5 md:grid-cols-10 gap-2">
+
+      <!-- Grid จัดเรียงรูปภาพขนาดกลาง 10 รูป -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
         ${team.photos.map((img, i) => `
-          <div class="group relative aspect-square rounded-lg overflow-hidden bg-slate-900 border border-slate-700 flex items-center justify-center">
-            ${img 
-              ? `<img src="${img}" class="w-full h-full object-cover">
-                 <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-white font-bold transition-all">ท่าที่ ${i+1}</div>`
-              : `<span class="text-xs text-slate-600 font-bold">${i+1}</span>`
-            }
+          <div class="bg-slate-900 border border-slate-700/80 rounded-2xl overflow-hidden shadow-md flex flex-col">
+            <!-- Header บอกลำดับรูป -->
+            <div class="bg-slate-950/80 px-3 py-1.5 text-xs font-bold text-slate-300 border-b border-slate-800 flex justify-between items-center">
+              <span>รูปที่ ${i+1}</span>
+              ${img ? '<span class="text-emerald-400 text-[11px] font-semibold">✓ ส่งแล้ว</span>' : '<span class="text-slate-500 text-[11px]">รอถ่าย</span>'}
+            </div>
+            
+            <!-- ตัวรูปภาพขนาดใหญ่ขึ้น -->
+            <div class="aspect-square w-full flex items-center justify-center p-1.5 bg-slate-950">
+              ${img 
+                ? `<img src="${img}" class="w-full h-full object-cover rounded-xl border border-slate-800 shadow">`
+                : `<div class="text-slate-600 text-xs font-semibold flex flex-col items-center gap-2">
+                     <span class="text-3xl opacity-30">📷</span>
+                     <span>ไม่มีรูปถ่าย</span>
+                   </div>`
+              }
+            </div>
           </div>
         `).join('')}
       </div>
@@ -295,14 +306,13 @@
     } else {
       card = document.createElement('div');
       card.id = `team-card-${team.id}`;
-      card.className = "bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg transition-all";
+      card.className = "bg-slate-800/90 border border-slate-700 rounded-3xl p-6 shadow-2xl transition-all";
       card.innerHTML = cardHTML;
       gallery.prepend(card);
     }
     updateTeamCount();
   }
 
-  // ฟังก์ชัน เพิ่ม / แก้ไข / ลบ ของครู
   async function addTeamManual() {
     const name = prompt('กรุณากรอกชื่อทีมใหม่:');
     if (!name) return;
