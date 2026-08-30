@@ -61,31 +61,48 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div class="bg-slate-800 border border-slate-700 rounded-3xl p-4 text-center shadow-xl">
-            <h3 class="text-slate-400 font-semibold mb-3">🎯 ท่าต้นแบบ (4:3)</h3>
-            <div class="relative aspect-[4/3] rounded-2xl overflow-hidden bg-slate-900 border border-slate-700 flex items-center justify-center p-2">
+            <h3 class="text-slate-400 font-semibold mb-3">🎯 ท่าต้นแบบ (3:4)</h3>
+            <div class="relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-900 border border-slate-700 flex items-center justify-center p-2 max-w-sm mx-auto">
               <img id="target-img" src="" class="max-w-full max-h-full object-contain">
             </div>
           </div>
 
           <div class="bg-slate-800 border border-slate-700 rounded-3xl p-4 text-center shadow-xl">
-            <h3 class="text-slate-400 font-semibold mb-3">📸 กล้องของทีมคุณ (4:3)</h3>
-            <div class="relative aspect-[4/3] rounded-2xl overflow-hidden bg-slate-900 border border-slate-700">
+            <h3 class="text-slate-400 font-semibold mb-3">📸 กล้องของทีมคุณ (3:4)</h3>
+            <div class="relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-900 border border-slate-700 max-w-sm mx-auto">
               <video id="webcam" autoplay playsinline muted class="w-full h-full object-cover mirror"></video>
             </div>
           </div>
         </div>
 
-        <button id="btn-take-photo" onclick="takePhoto()" class="w-full bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-bold py-5 rounded-2xl text-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3">
+        <button id="btn-take-photo" onclick="takePhoto()" class="w-full bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-bold py-5 rounded-2xl text-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 mb-8">
           <span>📸</span> กดถ่ายรูปส่งทันที
         </button>
+
+        <!-- แสดงรูปแถบเล็กที่ถ่ายไปแล้วของผู้แข่งขัน -->
+        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-5 shadow-lg">
+          <h4 class="text-slate-300 font-bold text-sm mb-3 flex items-center gap-2">
+            🖼️ รูปที่ทีมคุณถ่ายไว้แล้ว (<span id="my-taken-count">0</span>/10)
+          </h4>
+          <div id="my-preview-strip" class="grid grid-cols-5 sm:grid-cols-10 gap-2"></div>
+        </div>
       </div>
 
-      <div id="screen-finish" class="hidden bg-slate-800 border border-slate-700 rounded-3xl p-8 max-w-lg mx-auto text-center">
-        <div class="text-6xl mb-4">🏆</div>
-        <h2 class="text-3xl font-bold text-white mb-2">แข่งครบทั้ง 10 ท่าแล้ว!</h2>
-        <p class="text-slate-400 mb-6">ผลงานของทีมคุณแสดงบนหน้าจอหลักของคุณครูเรียบร้อยแล้ว</p>
-        <button onclick="location.reload()" class="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-6 py-3 rounded-xl transition-all">
-          🔄 เปลี่ยนทีม / เล่นใหม่
+      <!-- หน้าจอเมื่อแข่งเสร็จ + แสดงผลงานตัวเองครบ 10 รูป -->
+      <div id="screen-finish" class="hidden bg-slate-800 border border-slate-700 rounded-3xl p-6 md:p-8 max-w-4xl mx-auto text-center shadow-2xl">
+        <div class="text-6xl mb-3 animate-bounce">🏆</div>
+        <h2 class="text-3xl font-bold text-white mb-1">แข่งครบทั้ง 10 ท่าแล้ว!</h2>
+        <p class="text-amber-400 font-semibold text-lg mb-6" id="finish-team-name"></p>
+
+        <div class="mb-6 bg-slate-900 border border-slate-700 rounded-2xl p-4 text-left">
+          <h3 class="text-lg font-bold text-slate-200 mb-3 flex items-center gap-2">
+            📸 ผลงานการทำหน้าตลก 10 ท่าของทีมคุณ
+          </h3>
+          <div id="my-finish-gallery" class="grid grid-cols-2 sm:grid-cols-5 gap-3"></div>
+        </div>
+
+        <button onclick="location.reload()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-3.5 rounded-2xl transition-all shadow-lg shadow-indigo-600/30">
+          🔄 เปลี่ยนทีม / เล่นใหม่อีกครั้ง
         </button>
       </div>
     </div>
@@ -113,7 +130,7 @@
 
   </main>
 
-  <!-- Pop-up รหัสผ่านสุดหรู (Modal) -->
+  <!-- Pop-up รหัสผ่าน -->
   <div id="pwd-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4 transition-all">
     <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative">
       <div class="w-16 h-16 bg-indigo-500/20 text-indigo-400 rounded-2xl border border-indigo-500/30 flex items-center justify-center text-3xl mx-auto mb-4">
@@ -147,11 +164,12 @@
   let currentRound = 0;
   let teamName = "";
   let isTeacherAuthenticated = false;
+  let myPhotos = Array(10).fill(null); // เก็บรูปภาพของทีมตนเอง
 
   const video = document.getElementById('webcam');
   const canvas = document.getElementById('canvas');
 
-  // ระบบ Web Audio API สร้างเสียงเอฟเฟกต์ในตัว
+  // ระบบ Web Audio API สำหรับเสียงเอฟเฟกต์
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   
   function playSound(type) {
@@ -166,23 +184,27 @@
       // เสียงชัตเตอร์กล้องถ่ายรูป
       osc.type = 'square';
       osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.08);
-      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+      osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.09);
+      gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.09);
       osc.start();
-      osc.stop(audioCtx.currentTime + 0.08);
-    } else if (type === 'success') {
-      // เสียงถ่ายสำเร็จ / ถ่ายครบ
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
-      osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
-      osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
-      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.4);
+      osc.stop(audioCtx.currentTime + 0.09);
+    } else if (type === 'victory') {
+      // เสียงฉลองส่งครบ 10 ท่า
+      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+      notes.forEach((freq, idx) => {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.12);
+        g.connect(audioCtx.destination);
+        o.connect(g);
+        g.gain.setValueAtTime(0.25, audioCtx.currentTime + idx * 0.12);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.12 + 0.3);
+        o.start(audioCtx.currentTime + idx * 0.12);
+        o.stop(audioCtx.currentTime + idx * 0.12 + 0.3);
+      });
     } else if (type === 'error') {
-      // เสียงเตือนรหัสผิด
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(150, audioCtx.currentTime);
       gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
@@ -190,7 +212,6 @@
       osc.start();
       osc.stop(audioCtx.currentTime + 0.2);
     } else if (type === 'pop') {
-      // เสียงป๊อปเปิดโมดอล
       osc.type = 'sine';
       osc.frequency.setValueAtTime(400, audioCtx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.05);
@@ -237,6 +258,7 @@
       document.getElementById('screen-start').classList.add('hidden');
       document.getElementById('screen-game').classList.remove('hidden');
       document.getElementById('current-team-label').innerText = `(ทีม: ${teamName})`;
+      renderMyPreviewStrip();
       updateRoundUI();
     } catch (err) {
       alert('เปิดกล้องไม่ได้! โปรดอนุญาตสิทธิ์การใช้งานกล้องในเบราว์เซอร์');
@@ -253,20 +275,21 @@
   }
 
   async function takePhoto() {
-    playSound('shutter');
+    playSound('shutter'); // เสียงชัตเตอร์กล้องถ่ายรูป
     const btn = document.getElementById('btn-take-photo');
     btn.disabled = true;
 
-    // กำหนดขนาดสัดส่วนภาพเป็น 4:3 (640x480)
+    // กำหนดสัดส่วนเป็น 3:4 (480x640)
     const ctx = canvas.getContext('2d');
-    canvas.width = 640;
-    canvas.height = 480;
+    canvas.width = 480;
+    canvas.height = 640;
 
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     const photoData = canvas.toDataURL('image/jpeg', 0.6);
+    myPhotos[currentRound] = photoData;
 
     try {
       await fetch('/api/upload-photo', {
@@ -275,11 +298,11 @@
         body: JSON.stringify({ teamName, photo: photoData, photoIndex: currentRound })
       });
 
-      playSound('success');
       const statusMsg = document.getElementById('photo-status');
       statusMsg.classList.remove('hidden');
       setTimeout(() => statusMsg.classList.add('hidden'), 1200);
 
+      renderMyPreviewStrip();
       currentRound++;
       updateRoundUI();
     } catch (err) {
@@ -290,11 +313,39 @@
     }
   }
 
+  function renderMyPreviewStrip() {
+    const strip = document.getElementById('my-preview-strip');
+    const takenCount = myPhotos.filter(p => p !== null).length;
+    document.getElementById('my-taken-count').innerText = takenCount;
+
+    strip.innerHTML = myPhotos.map((img, i) => `
+      <div class="aspect-[3/4] rounded-lg overflow-hidden bg-slate-900 border border-slate-700 flex items-center justify-center relative">
+        ${img 
+          ? `<img src="${img}" class="w-full h-full object-cover">`
+          : `<span class="text-[10px] text-slate-600 font-bold">${i+1}</span>`
+        }
+      </div>
+    `).join('');
+  }
+
   function finishGame() {
-    playSound('success');
+    playSound('victory'); // เสียงฉลองเมื่อแข่งครบ 10 ท่า
     if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+    
     document.getElementById('screen-game').classList.add('hidden');
     document.getElementById('screen-finish').classList.remove('hidden');
+    document.getElementById('finish-team-name').innerText = `ทีม: ${teamName}`;
+
+    // แสดงรูปทั้ง 10 ท่าของทีมตัวเอง
+    const finishGallery = document.getElementById('my-finish-gallery');
+    finishGallery.innerHTML = myPhotos.map((img, i) => `
+      <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden p-1 shadow">
+        <div class="text-[11px] font-bold text-slate-400 text-center py-1">ท่าที่ ${i+1}</div>
+        <div class="aspect-[3/4] rounded-lg overflow-hidden bg-slate-900">
+          ${img ? `<img src="${img}" class="w-full h-full object-cover">` : ''}
+        </div>
+      </div>
+    `).join('');
   }
 
   // ระบบ Modal ป๊อปอัพรหัสผ่าน
@@ -317,7 +368,7 @@
   function checkModalPassword() {
     const input = document.getElementById('modal-pwd-input').value;
     if (input === '1234') {
-      playSound('success');
+      playSound('pop');
       isTeacherAuthenticated = true;
       closePasswordModal();
       switchTab('teacher');
@@ -364,7 +415,7 @@
 
     let card = document.getElementById(`team-card-${team.id}`);
     
-    // อัตราส่วน 4:3 ทั้งหมด (aspect-[4/3])
+    // แสดงรูปสัดส่วน 3:4 บนหน้าจอครู
     const cardHTML = `
       <div class="flex justify-between items-center mb-5 border-b border-slate-700/60 pb-3">
         <div class="flex items-center gap-3">
@@ -382,7 +433,6 @@
         </div>
       </div>
 
-      <!-- Grid แสดงรูปถ่ายขนาดกลาง 4:3 เรียง 10 ท่า -->
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
         ${team.photos.map((img, i) => `
           <div class="bg-slate-900 border border-slate-700/80 rounded-2xl overflow-hidden shadow-md flex flex-col">
@@ -391,7 +441,7 @@
               ${img ? '<span class="text-emerald-400 text-[11px] font-semibold">✓ ส่งแล้ว</span>' : '<span class="text-slate-500 text-[11px]">รอถ่าย</span>'}
             </div>
             
-            <div class="aspect-[4/3] w-full flex items-center justify-center p-1.5 bg-slate-950">
+            <div class="aspect-[3/4] w-full flex items-center justify-center p-1.5 bg-slate-950">
               ${img 
                 ? `<img src="${img}" class="w-full h-full object-cover rounded-xl border border-slate-800 shadow">`
                 : `<div class="text-slate-600 text-xs font-semibold flex flex-col items-center gap-1">
