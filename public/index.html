@@ -10,8 +10,6 @@
   <style>
     body { font-family: 'Kanit', sans-serif; }
     .mirror { transform: scaleX(-1); }
-    @keyframes pulse-fast { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-    .animate-pulse-fast { animation: pulse-fast 0.6s infinite; }
   </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen pb-12">
@@ -37,36 +35,28 @@
 
     <!-- Section นักเรียน -->
     <div id="student-view">
-      <div id="screen-start" class="bg-slate-800/80 backdrop-blur border border-slate-700 rounded-3xl p-8 max-w-lg mx-auto text-center shadow-2xl">
+      <div id="screen-start" class="bg-slate-800 border border-slate-700 rounded-3xl p-8 max-w-lg mx-auto text-center shadow-2xl">
         <div class="text-6xl mb-4">📸</div>
         <h2 class="text-3xl font-bold text-white mb-2">เกมถ่ายรูปทำหน้าตลก</h2>
-        <p class="text-slate-400 mb-6">ทำหน้าตลกตามรูปต้นแบบ 10 รูป รูปละ 10 วินาที</p>
+        <p class="text-slate-400 mb-6">ทำหน้าตามรูปต้นแบบแล้วกดปุ่มถ่ายรูปให้ครบ 10 ท่า</p>
         
         <input type="text" id="student-name" placeholder="ระบุชื่อ-นามสกุล หรือ เลขที่..." 
-               class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-5 py-4 text-center text-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 mb-6 transition-all">
+               class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-5 py-4 text-center text-lg text-white focus:outline-none focus:border-indigo-500 mb-6">
         
-        <button onclick="startGame()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-4 rounded-2xl text-xl shadow-lg shadow-emerald-500/20 active:scale-95 transition-all">
+        <button onclick="startGame()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl text-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95">
           🚀 เริ่มเล่นเกม
         </button>
       </div>
 
       <div id="screen-game" class="hidden">
-        <div class="flex justify-between items-center mb-6 bg-slate-800/60 border border-slate-700 p-4 rounded-2xl">
-          <div class="flex items-center gap-3">
-            <span class="bg-indigo-500/20 text-indigo-400 px-4 py-1.5 rounded-full font-bold border border-indigo-500/30 text-lg" id="round-text">
-              1 / 10
-            </span>
-            <span class="text-slate-400 text-sm hidden sm:inline">ทำหน้าให้เหมือนแล้วค้างไว้!</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-xs uppercase text-slate-400 font-bold tracking-wider">นับถอยหลัง</span>
-            <div id="timer-text" class="text-4xl font-extrabold text-rose-500 bg-rose-500/10 px-4 py-1 rounded-xl border border-rose-500/20 animate-pulse-fast">
-              10
-            </div>
-          </div>
+        <div class="flex justify-between items-center mb-6 bg-slate-800 border border-slate-700 p-4 rounded-2xl">
+          <span class="bg-indigo-500/20 text-indigo-400 px-4 py-1.5 rounded-full font-bold border border-indigo-500/30 text-lg" id="round-text">
+            ท่าที่ 1 / 10
+          </span>
+          <span class="text-slate-300 font-medium text-sm">พร้อมแล้วกดปุ่ม "ถ่ายรูปภาพนี้" ด้านล่างได้เลย!</span>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div class="bg-slate-800 border border-slate-700 rounded-3xl p-4 text-center shadow-xl">
             <h3 class="text-slate-400 font-semibold mb-3">🎯 ท่าต้นแบบ</h3>
             <div class="relative aspect-square rounded-2xl overflow-hidden bg-slate-900 border border-slate-700 flex items-center justify-center p-2">
@@ -81,26 +71,31 @@
             </div>
           </div>
         </div>
+
+        <!-- ปุ่มถ่ายรูปใหญ่ชัดเจน -->
+        <button onclick="takePhoto()" class="w-full bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-bold py-5 rounded-2xl text-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3">
+          <span>📸</span> กดถ่ายรูปภาพนี้
+        </button>
       </div>
 
       <div id="screen-finish" class="hidden bg-slate-800 border border-slate-700 rounded-3xl p-8 max-w-lg mx-auto text-center">
         <div class="text-6xl mb-4">🎉</div>
-        <h2 class="text-3xl font-bold text-white mb-2">ถ่ายครบ 10 ท่าแล้ว!</h2>
-        <p id="upload-status" class="text-amber-400 font-medium mb-6">⏳ กำลังส่งผลงานไปยังระบบครู...</p>
-        <button onclick="location.reload()" class="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-6 py-3 rounded-xl transition-all">
-          🔄 เล่นใหม่อีกครั้ง
+        <h2 class="text-3xl font-bold text-white mb-2">ถ่ายครบ 10 ท่าเรียบร้อย!</h2>
+        <p class="text-slate-400 mb-6">กดปุ่มด้านล่างเพื่อส่งผลงานขึ้นหน้าจอคุณครู</p>
+        
+        <button id="btn-submit" onclick="submitPhotos()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl text-xl shadow-lg mb-4 active:scale-95 transition-all">
+          📤 กดส่งผลงานให้คุณครู
         </button>
+        <p id="upload-status" class="font-medium hidden"></p>
       </div>
     </div>
 
     <!-- Section ครู -->
     <div id="teacher-view" class="hidden">
       <div class="flex justify-between items-center mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-white flex items-center gap-2">
-            📊 ผลงานนักเรียน <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-normal border border-emerald-500/30">Real-time</span>
-          </h2>
-        </div>
+        <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+          📊 ผลงานนักเรียน <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/30">Real-time</span>
+        </h2>
         <div id="total-students" class="bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl text-slate-300 font-semibold">
           ส่งแล้ว 0 คน
         </div>
@@ -117,8 +112,6 @@
   const socket = io();
   let targetImages = [];
   let currentRound = 0;
-  let timeLeft = 10;
-  let timerInterval = null;
   const capturedPhotos = [];
   let studentName = "";
 
@@ -141,55 +134,51 @@
       
       document.getElementById('screen-start').classList.add('hidden');
       document.getElementById('screen-game').classList.remove('hidden');
-      nextRound();
+      updateRoundUI();
     } catch (err) {
       alert('เปิดกล้องไม่ได้! โปรดอนุญาตสิทธิ์การใช้งานกล้องในเบราว์เซอร์');
     }
   }
 
-  function nextRound() {
+  function updateRoundUI() {
     if (currentRound >= targetImages.length) {
       finishGame();
       return;
     }
-
     document.getElementById('round-text').innerText = `ท่าที่ ${currentRound + 1} / ${targetImages.length}`;
     document.getElementById('target-img').src = targetImages[currentRound];
-
-    timeLeft = 10;
-    document.getElementById('timer-text').innerText = timeLeft;
-
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-      timeLeft--;
-      document.getElementById('timer-text').innerText = timeLeft;
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        takePhoto();
-      }
-    }, 1000);
   }
 
   function takePhoto() {
     const ctx = canvas.getContext('2d');
-    canvas.width = 640;
-    canvas.height = 480;
+    canvas.width = 320;
+    canvas.height = 320;
 
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // บีบอัดภาพเป็น JPEG ความละเอียด 60% เพื่อลดขนาดไฟล์
-    capturedPhotos.push(canvas.toDataURL('image/jpeg', 0.6));
+    // ย่อไฟล์รูปเป็น JPEG ขนาดจิ๋ว (~15KB) เพื่อให้ส่งผ่านเน็ตได้เร็ว 100%
+    capturedPhotos.push(canvas.toDataURL('image/jpeg', 0.5));
+    
     currentRound++;
-    nextRound();
+    updateRoundUI();
   }
 
-  async function finishGame() {
+  function finishGame() {
     if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
-    
     document.getElementById('screen-game').classList.add('hidden');
     document.getElementById('screen-finish').classList.remove('hidden');
+  }
+
+  async function submitPhotos() {
+    const statusText = document.getElementById('upload-status');
+    const submitBtn = document.getElementById('btn-submit');
+    
+    submitBtn.disabled = true;
+    submitBtn.className = "w-full bg-slate-700 text-slate-400 font-bold py-4 rounded-2xl text-xl cursor-not-allowed mb-4";
+    statusText.innerText = '⏳ กำลังส่งผลงานไปยังระบบครู...';
+    statusText.className = 'text-amber-400 font-medium block mb-4';
 
     try {
       const res = await fetch('/api/upload', {
@@ -199,12 +188,14 @@
       });
       const data = await res.json();
       if (data.success) {
-        document.getElementById('upload-status').innerText = '✅ ส่งรูปภาพขึ้นหน้าจอครูเรียบร้อยแล้ว!';
-        document.getElementById('upload-status').className = 'text-emerald-400 font-medium mb-6';
+        statusText.innerText = '✅ ส่งรูปภาพขึ้นหน้าจอครูสำเร็จแล้ว!';
+        statusText.className = 'text-emerald-400 font-medium block mb-4';
       }
     } catch (err) {
-      document.getElementById('upload-status').innerText = '❌ ส่งรูปไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
-      document.getElementById('upload-status').className = 'text-rose-400 font-medium mb-6';
+      statusText.innerText = '❌ ส่งไม่สำเร็จ กรุณากดลองอีกครั้ง';
+      statusText.className = 'text-rose-400 font-medium block mb-4';
+      submitBtn.disabled = false;
+      submitBtn.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl text-xl shadow-lg mb-4";
     }
   }
 
