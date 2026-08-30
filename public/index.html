@@ -25,7 +25,7 @@
       <button id="btn-tab-student" onclick="switchTab('student')" class="px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600 text-white transition-all shadow-md">
         🎮 ผู้แข่งขัน
       </button>
-      <button id="btn-tab-teacher" onclick="switchTab('teacher')" class="px-4 py-2 text-sm font-semibold rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-2">
+      <button id="btn-tab-teacher" onclick="openPasswordModal()" class="px-4 py-2 text-sm font-semibold rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-2">
         🔒 หน้าจอครู <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
       </button>
     </div>
@@ -36,7 +36,7 @@
     <!-- Section ผู้แข่งขัน -->
     <div id="student-view">
       <div id="screen-start" class="bg-slate-800 border border-slate-700 rounded-3xl p-8 max-w-lg mx-auto text-center shadow-2xl">
-        <div class="text-6xl mb-4">📸</div>
+        <div class="text-6xl mb-4 animate-bounce">📸</div>
         <h2 class="text-3xl font-bold text-white mb-2">เกมถ่ายรูปแข่งขันทำหน้าตลก</h2>
         <p class="text-slate-400 mb-6">ถ่ายรูปทีละท่า รูปจะเด้งขึ้นหน้าจอครูทันทีแบบ Real-time!</p>
         
@@ -61,15 +61,15 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div class="bg-slate-800 border border-slate-700 rounded-3xl p-4 text-center shadow-xl">
-            <h3 class="text-slate-400 font-semibold mb-3">🎯 ท่าต้นแบบ</h3>
-            <div class="relative aspect-square rounded-2xl overflow-hidden bg-slate-900 border border-slate-700 flex items-center justify-center p-2">
+            <h3 class="text-slate-400 font-semibold mb-3">🎯 ท่าต้นแบบ (4:3)</h3>
+            <div class="relative aspect-[4/3] rounded-2xl overflow-hidden bg-slate-900 border border-slate-700 flex items-center justify-center p-2">
               <img id="target-img" src="" class="max-w-full max-h-full object-contain">
             </div>
           </div>
 
           <div class="bg-slate-800 border border-slate-700 rounded-3xl p-4 text-center shadow-xl">
-            <h3 class="text-slate-400 font-semibold mb-3">📸 กล้องของทีมคุณ</h3>
-            <div class="relative aspect-square rounded-2xl overflow-hidden bg-slate-900 border border-slate-700">
+            <h3 class="text-slate-400 font-semibold mb-3">📸 กล้องของทีมคุณ (4:3)</h3>
+            <div class="relative aspect-[4/3] rounded-2xl overflow-hidden bg-slate-900 border border-slate-700">
               <video id="webcam" autoplay playsinline muted class="w-full h-full object-cover mirror"></video>
             </div>
           </div>
@@ -90,7 +90,7 @@
       </div>
     </div>
 
-    <!-- Section ครู (รูปขนาดใหญ่ จัดเรียง 1-10 ชัดเจน) -->
+    <!-- Section ครู -->
     <div id="teacher-view" class="hidden">
       <div class="flex justify-between items-center mb-6">
         <div>
@@ -113,6 +113,32 @@
 
   </main>
 
+  <!-- Pop-up รหัสผ่านสุดหรู (Modal) -->
+  <div id="pwd-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center hidden z-50 p-4 transition-all">
+    <div class="bg-slate-800 border border-slate-700 rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative">
+      <div class="w-16 h-16 bg-indigo-500/20 text-indigo-400 rounded-2xl border border-indigo-500/30 flex items-center justify-center text-3xl mx-auto mb-4">
+        🔒
+      </div>
+      <h3 class="text-2xl font-bold text-white mb-1">เข้าสู่ระบบคุณครู</h3>
+      <p class="text-slate-400 text-sm mb-6">กรอกรหัสผ่านเพื่อเข้าสู่แผงควบคุม</p>
+      
+      <input type="password" id="modal-pwd-input" placeholder="ใส่รหัสผ่าน..." 
+             onkeyup="if(event.key === 'Enter') checkModalPassword()"
+             class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 text-center text-xl text-white tracking-widest focus:outline-none focus:border-indigo-500 mb-2">
+      
+      <p id="modal-pwd-error" class="text-rose-400 text-xs font-semibold mb-4 hidden">❌ รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่</p>
+
+      <div class="flex gap-3 mt-4">
+        <button onclick="closePasswordModal()" class="w-1/2 bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold py-3 rounded-xl transition-all">
+          ยกเลิก
+        </button>
+        <button onclick="checkModalPassword()" class="w-1/2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-600/30 transition-all">
+          ยืนยัน
+        </button>
+      </div>
+    </div>
+  </div>
+
   <canvas id="canvas" class="hidden"></canvas>
 
 <script>
@@ -124,6 +150,56 @@
 
   const video = document.getElementById('webcam');
   const canvas = document.getElementById('canvas');
+
+  // ระบบ Web Audio API สร้างเสียงเอฟเฟกต์ในตัว
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  
+  function playSound(type) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    if (type === 'shutter') {
+      // เสียงชัตเตอร์กล้องถ่ายรูป
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.08);
+    } else if (type === 'success') {
+      // เสียงถ่ายสำเร็จ / ถ่ายครบ
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+      osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+      osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.4);
+    } else if (type === 'error') {
+      // เสียงเตือนรหัสผิด
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.2);
+    } else if (type === 'pop') {
+      // เสียงป๊อปเปิดโมดอล
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.05);
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.05);
+    }
+  }
 
   fetch('/api/targets').then(r => r.json()).then(data => targetImages = data);
 
@@ -147,7 +223,12 @@
 
   async function startGame() {
     teamName = document.getElementById('team-name').value.trim();
-    if (!teamName) return alert('กรุณากรอกชื่อทีมที่เข้าร่วมแข่งขันก่อนครับ');
+    if (!teamName) {
+      playSound('error');
+      return alert('กรุณากรอกชื่อทีมที่เข้าร่วมแข่งขันก่อนครับ');
+    }
+
+    playSound('pop');
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
@@ -172,12 +253,14 @@
   }
 
   async function takePhoto() {
+    playSound('shutter');
     const btn = document.getElementById('btn-take-photo');
     btn.disabled = true;
 
+    // กำหนดขนาดสัดส่วนภาพเป็น 4:3 (640x480)
     const ctx = canvas.getContext('2d');
-    canvas.width = 400;
-    canvas.height = 400;
+    canvas.width = 640;
+    canvas.height = 480;
 
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
@@ -192,13 +275,15 @@
         body: JSON.stringify({ teamName, photo: photoData, photoIndex: currentRound })
       });
 
+      playSound('success');
       const statusMsg = document.getElementById('photo-status');
       statusMsg.classList.remove('hidden');
-      setTimeout(() => statusMsg.classList.add('hidden'), 1500);
+      setTimeout(() => statusMsg.classList.add('hidden'), 1200);
 
       currentRound++;
       updateRoundUI();
     } catch (err) {
+      playSound('error');
       alert('เกิดข้อผิดพลาดในการส่งรูปภาพ กรุณาถ่ายใหม่อีกครั้ง');
     } finally {
       btn.disabled = false;
@@ -206,22 +291,43 @@
   }
 
   function finishGame() {
+    playSound('success');
     if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
     document.getElementById('screen-game').classList.add('hidden');
     document.getElementById('screen-finish').classList.remove('hidden');
   }
 
-  function switchTab(tab) {
-    if (tab === 'teacher' && !isTeacherAuthenticated) {
-      const pwd = prompt('🔒 กรุณากรอกรหัสผ่านสำหรับคุณครู:');
-      if (pwd === '1234') {
-        isTeacherAuthenticated = true;
-      } else {
-        alert('❌ รหัสผ่านไม่ถูกต้อง!');
-        return;
-      }
+  // ระบบ Modal ป๊อปอัพรหัสผ่าน
+  function openPasswordModal() {
+    if (isTeacherAuthenticated) {
+      switchTab('teacher');
+      return;
     }
+    playSound('pop');
+    document.getElementById('pwd-modal').classList.remove('hidden');
+    document.getElementById('modal-pwd-input').focus();
+  }
 
+  function closePasswordModal() {
+    document.getElementById('pwd-modal').classList.add('hidden');
+    document.getElementById('modal-pwd-error').classList.add('hidden');
+    document.getElementById('modal-pwd-input').value = '';
+  }
+
+  function checkModalPassword() {
+    const input = document.getElementById('modal-pwd-input').value;
+    if (input === '1234') {
+      playSound('success');
+      isTeacherAuthenticated = true;
+      closePasswordModal();
+      switchTab('teacher');
+    } else {
+      playSound('error');
+      document.getElementById('modal-pwd-error').classList.remove('hidden');
+    }
+  }
+
+  function switchTab(tab) {
     const isStudent = tab === 'student';
     document.getElementById('student-view').classList.toggle('hidden', !isStudent);
     document.getElementById('teacher-view').classList.toggle('hidden', isStudent);
@@ -258,7 +364,7 @@
 
     let card = document.getElementById(`team-card-${team.id}`);
     
-    // การแสดงผลรูปภาพขนาดกลาง ชัดเจน เรียงรูปที่ 1 ถึง 10 (2 แถว แถวละ 5 รูปบนจอคอม / 2 รูปบนจอมือถือ)
+    // อัตราส่วน 4:3 ทั้งหมด (aspect-[4/3])
     const cardHTML = `
       <div class="flex justify-between items-center mb-5 border-b border-slate-700/60 pb-3">
         <div class="flex items-center gap-3">
@@ -276,22 +382,20 @@
         </div>
       </div>
 
-      <!-- Grid จัดเรียงรูปภาพขนาดกลาง 10 รูป -->
+      <!-- Grid แสดงรูปถ่ายขนาดกลาง 4:3 เรียง 10 ท่า -->
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
         ${team.photos.map((img, i) => `
           <div class="bg-slate-900 border border-slate-700/80 rounded-2xl overflow-hidden shadow-md flex flex-col">
-            <!-- Header บอกลำดับรูป -->
             <div class="bg-slate-950/80 px-3 py-1.5 text-xs font-bold text-slate-300 border-b border-slate-800 flex justify-between items-center">
               <span>รูปที่ ${i+1}</span>
               ${img ? '<span class="text-emerald-400 text-[11px] font-semibold">✓ ส่งแล้ว</span>' : '<span class="text-slate-500 text-[11px]">รอถ่าย</span>'}
             </div>
             
-            <!-- ตัวรูปภาพขนาดใหญ่ขึ้น -->
-            <div class="aspect-square w-full flex items-center justify-center p-1.5 bg-slate-950">
+            <div class="aspect-[4/3] w-full flex items-center justify-center p-1.5 bg-slate-950">
               ${img 
                 ? `<img src="${img}" class="w-full h-full object-cover rounded-xl border border-slate-800 shadow">`
-                : `<div class="text-slate-600 text-xs font-semibold flex flex-col items-center gap-2">
-                     <span class="text-3xl opacity-30">📷</span>
+                : `<div class="text-slate-600 text-xs font-semibold flex flex-col items-center gap-1">
+                     <span class="text-2xl opacity-30">📷</span>
                      <span>ไม่มีรูปถ่าย</span>
                    </div>`
               }
