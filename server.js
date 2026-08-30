@@ -1,20 +1,21 @@
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 const cors = require('cors');
 const path = require('path');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: "*" }
+});
 
-// ปรับขีดจำกัดขนาดข้อมูลเป็น 50MB เพื่อรองรับรูป Base64 ทั้ง 10 รูป
 app.use(express.json({ limit: '50mb' }));
 app.use(cors());
-
-// ให้บริการไฟล์ HTML จากโฟลเดอร์ public
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ตัวแปรเก็บข้อมูลรูปถ่ายของนักเรียนในหน่วยความจำ (In-Memory Data)
 const studentResults = [];
 
-// ลิงก์รูปภาพต้นแบบ 10 รูป
 const targetImages = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500',
   'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500',
@@ -28,15 +29,16 @@ const targetImages = [
   'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=500'
 ];
 
-// API ดึงรูปภาพต้นแบบ
 app.get('/api/targets', (req, res) => {
   res.json(targetImages);
 });
 
-// API บันทึกผลการเล่นของนักเรียน
+app.get('/api/results', (req, res) => {
+  res.json(studentResults);
+});
+
 app.post('/api/upload', (req, res) => {
   const { studentName, photos } = req.body;
-  
   if (!studentName || !photos || photos.length === 0) {
     return res.status(400).json({ success: false, message: 'ข้อมูลไม่ครบถ้วน' });
   }
@@ -44,21 +46,23 @@ app.post('/api/upload', (req, res) => {
   const record = {
     id: Date.now(),
     studentName,
-    timestamp: new Date().toLocaleString('th-TH'),
+    timestamp: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
     photos
   };
 
-  studentResults.unshift(record); // เก็บบันทึกไว้หน้าสุด
-  res.json({ success: true, message: 'บันทึกข้อมูลสำเร็จ' });
+  studentResults.unshift(record);
+
+  // ส่งข้อมูลหาครูแบบ Real-time ทันทีที่เด็กส่งงาน
+  io.emit('new_submission', record);
+
+  res.json({ success: true });
 });
 
-// API สำหรับระบบครู ดึงผลรวมนักเรียนทุกคน
-app.get('/api/results', (req, res) => {
-  res.json(studentResults);
+io.on('connection', (socket) => {
+  console.log('⚡ มีผู้ใช้งานเชื่อมต่อ:', socket.id);
 });
 
-// กำหนด Port ตามที่ Railway กำหนดให้อัตโนมัติ
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server runing on port ${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
