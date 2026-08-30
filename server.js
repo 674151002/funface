@@ -6,27 +6,32 @@ const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
+
+// ขยายขนาดการส่งข้อมูลผ่าน Socket.IO เป็น 100MB
 const io = new Server(server, {
-  cors: { origin: "*" }
+  cors: { origin: "*" },
+  maxHttpBufferSize: 1e8
 });
 
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const studentResults = [];
 
+// ลิงก์รูปภาพทั้ง 10 รูปของคุณ
 const targetImages = [
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500',
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500',
-  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=500',
-  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500',
-  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=500',
-  'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=500',
-  'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=500',
-  'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=500'
+  'https://stickershop.line-scdn.net/stickershop/v1/product/11806979/LINEStorePC/main.png?v=1',
+  'https://e7.pngegg.com/pngimages/7/432/png-clipart-smiley-emoticon-super-sad-face-game-internet-forum.png',
+  'https://img.magnific.com/premium-vector/smiley-emote-smiling-face-icon-cute-smile-sign-happy-emotion-symbol-emoticon-symbol-sign-vector_659151-4937.jpg',
+  'https://stickershop.line-scdn.net/stickershop/v1/product/11806979/LINEStorePC/main.png?v=1',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTolyXuxf6llMKoB1n6xbdqQC8pT0fX2AyK8BG9dKuzymL_EADygOXpXFoV&s=10',
+  'https://stickershop.line-scdn.net/stickershop/v1/product/12888318/LINEStorePC/main.png?v=1',
+  'https://stickershop.line-scdn.net/stickershop/v1/product/8408791/LINEStorePC/main.png?v=1',
+  'https://zedth.wordpress.com/wp-content/uploads/2010/06/baby_2_thumb.jpg?w=454&h=342',
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIgXk-kSi2tm2pgMa8Xt-hmDGIxGV7rF5WDat6utF3RA&s=10',
+  'https://i.pinimg.com/236x/a8/23/80/a823805da4b3c5d7878ae71b0081d121.jpg'
 ];
 
 app.get('/api/targets', (req, res) => {
@@ -52,7 +57,7 @@ app.post('/api/upload', (req, res) => {
 
   studentResults.unshift(record);
 
-  // ส่งข้อมูลหาครูแบบ Real-time ทันทีที่เด็กส่งงาน
+  // ส่งผลงานไปยังหน้าจอครูแบบ Real-time
   io.emit('new_submission', record);
 
   res.json({ success: true });
