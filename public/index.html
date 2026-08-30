@@ -16,44 +16,47 @@
 
   <header class="max-w-5xl mx-auto pt-6 px-4 flex justify-between items-center">
     <div class="flex items-center space-x-2">
-      <span class="text-3xl">🤪</span>
+      <span class="text-3xl">🏆</span>
       <h1 class="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-pink-500 bg-clip-text text-transparent">
-        FunnyFace Game
+        FunnyFace Competition
       </h1>
     </div>
     <div class="bg-slate-800 p-1 rounded-xl flex border border-slate-700">
       <button id="btn-tab-student" onclick="switchTab('student')" class="px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600 text-white transition-all shadow-md">
-        🎮 นักเรียน
+        🎮 ผู้แข่งขัน
       </button>
       <button id="btn-tab-teacher" onclick="switchTab('teacher')" class="px-4 py-2 text-sm font-semibold rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-2">
-        👨‍🏫 หน้าจอครู <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+        🔒 หน้าจอครู <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
       </button>
     </div>
   </header>
 
   <main class="max-w-5xl mx-auto mt-6 px-4">
 
-    <!-- Section นักเรียน -->
+    <!-- Section ผู้แข่งขัน -->
     <div id="student-view">
       <div id="screen-start" class="bg-slate-800 border border-slate-700 rounded-3xl p-8 max-w-lg mx-auto text-center shadow-2xl">
         <div class="text-6xl mb-4">📸</div>
-        <h2 class="text-3xl font-bold text-white mb-2">เกมถ่ายรูปทำหน้าตลก</h2>
-        <p class="text-slate-400 mb-6">ทำหน้าตามรูปต้นแบบแล้วกดปุ่มถ่ายรูปให้ครบ 10 ท่า</p>
+        <h2 class="text-3xl font-bold text-white mb-2">เกมถ่ายรูปแข่งขันทำหน้าตลก</h2>
+        <p class="text-slate-400 mb-6">ถ่ายรูปทีละท่า รูปจะถูกส่งแสดงบนหน้าจอครูทันทีแบบ Real-time!</p>
         
-        <input type="text" id="student-name" placeholder="ระบุชื่อ-นามสกุล หรือ เลขที่..." 
+        <input type="text" id="team-name" placeholder="ระบุชื่อทีมที่เข้าร่วมแข่งขัน..." 
                class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-5 py-4 text-center text-lg text-white focus:outline-none focus:border-indigo-500 mb-6">
         
         <button onclick="startGame()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl text-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95">
-          🚀 เริ่มเล่นเกม
+          🚀 เข้าสู่การแข่งขัน
         </button>
       </div>
 
       <div id="screen-game" class="hidden">
         <div class="flex justify-between items-center mb-6 bg-slate-800 border border-slate-700 p-4 rounded-2xl">
-          <span class="bg-indigo-500/20 text-indigo-400 px-4 py-1.5 rounded-full font-bold border border-indigo-500/30 text-lg" id="round-text">
-            ท่าที่ 1 / 10
-          </span>
-          <span class="text-slate-300 font-medium text-sm">พร้อมแล้วกดปุ่ม "ถ่ายรูปภาพนี้" ด้านล่างได้เลย!</span>
+          <div class="flex items-center gap-2">
+            <span class="bg-indigo-500/20 text-indigo-400 px-4 py-1.5 rounded-full font-bold border border-indigo-500/30 text-lg" id="round-text">
+              ท่าที่ 1 / 10
+            </span>
+            <span id="current-team-label" class="text-amber-400 font-bold ml-2"></span>
+          </div>
+          <span id="photo-status" class="text-emerald-400 font-medium text-sm hidden">✅ ส่งรูปท่านี้แล้ว!</span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -65,39 +68,43 @@
           </div>
 
           <div class="bg-slate-800 border border-slate-700 rounded-3xl p-4 text-center shadow-xl">
-            <h3 class="text-slate-400 font-semibold mb-3">📸 กล้องของคุณ</h3>
+            <h3 class="text-slate-400 font-semibold mb-3">📸 กล้องของทีมคุณ</h3>
             <div class="relative aspect-square rounded-2xl overflow-hidden bg-slate-900 border border-slate-700">
               <video id="webcam" autoplay playsinline muted class="w-full h-full object-cover mirror"></video>
             </div>
           </div>
         </div>
 
-        <!-- ปุ่มถ่ายรูปใหญ่ชัดเจน -->
-        <button onclick="takePhoto()" class="w-full bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-bold py-5 rounded-2xl text-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3">
-          <span>📸</span> กดถ่ายรูปภาพนี้
+        <button id="btn-take-photo" onclick="takePhoto()" class="w-full bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-bold py-5 rounded-2xl text-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3">
+          <span>📸</span> กดถ่ายรูปส่งทันที
         </button>
       </div>
 
       <div id="screen-finish" class="hidden bg-slate-800 border border-slate-700 rounded-3xl p-8 max-w-lg mx-auto text-center">
-        <div class="text-6xl mb-4">🎉</div>
-        <h2 class="text-3xl font-bold text-white mb-2">ถ่ายครบ 10 ท่าเรียบร้อย!</h2>
-        <p class="text-slate-400 mb-6">กดปุ่มด้านล่างเพื่อส่งผลงานขึ้นหน้าจอคุณครู</p>
-        
-        <button id="btn-submit" onclick="submitPhotos()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl text-xl shadow-lg mb-4 active:scale-95 transition-all">
-          📤 กดส่งผลงานให้คุณครู
+        <div class="text-6xl mb-4">🏆</div>
+        <h2 class="text-3xl font-bold text-white mb-2">แข่งครบทั้ง 10 ท่าแล้ว!</h2>
+        <p class="text-slate-400 mb-6">ผลงานของทีมคุณแสดงบนหน้าจอหลักของคุณครูเรียบร้อยแล้ว</p>
+        <button onclick="location.reload()" class="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-6 py-3 rounded-xl transition-all">
+          🔄 เปลี่ยนทีม / เล่นใหม่
         </button>
-        <p id="upload-status" class="font-medium hidden"></p>
       </div>
     </div>
 
-    <!-- Section ครู -->
+    <!-- Section ครู (Password Protected + CRUD) -->
     <div id="teacher-view" class="hidden">
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-white flex items-center gap-2">
-          📊 ผลงานนักเรียน <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/30">Real-time</span>
-        </h2>
-        <div id="total-students" class="bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl text-slate-300 font-semibold">
-          ส่งแล้ว 0 คน
+        <div>
+          <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+            📊 แผงควบคุมและผลงานการแข่งขัน <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/30">Real-time</span>
+          </h2>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="addTeamManual()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-all flex items-center gap-1 shadow-md">
+            ➕ เพิ่มทีม
+          </button>
+          <div id="total-teams" class="bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl text-slate-300 font-semibold text-sm flex items-center">
+            ส่งแล้ว 0 ทีม
+          </div>
         </div>
       </div>
 
@@ -112,21 +119,36 @@
   const socket = io();
   let targetImages = [];
   let currentRound = 0;
-  const capturedPhotos = [];
-  let studentName = "";
+  let teamName = "";
+  let isTeacherAuthenticated = false;
 
   const video = document.getElementById('webcam');
   const canvas = document.getElementById('canvas');
 
   fetch('/api/targets').then(r => r.json()).then(data => targetImages = data);
 
-  socket.on('new_submission', (data) => {
-    addSubmissionToTeacherView(data, true);
+  // Socket.IO Listeners
+  socket.on('team_updated', (team) => {
+    if (!document.getElementById('teacher-view').classList.contains('hidden')) {
+      renderOrUpdateTeamCard(team);
+    }
+  });
+
+  socket.on('team_added', (team) => {
+    if (!document.getElementById('teacher-view').classList.contains('hidden')) {
+      renderOrUpdateTeamCard(team);
+    }
+  });
+
+  socket.on('team_deleted', (id) => {
+    const card = document.getElementById(`team-card-${id}`);
+    if (card) card.remove();
+    updateTeamCount();
   });
 
   async function startGame() {
-    studentName = document.getElementById('student-name').value.trim();
-    if (!studentName) return alert('กรุณากรอกชื่อก่อนเริ่มเล่นเกมครับ');
+    teamName = document.getElementById('team-name').value.trim();
+    if (!teamName) return alert('กรุณากรอกชื่อทีมที่เข้าร่วมแข่งขันก่อนครับ');
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
@@ -134,6 +156,7 @@
       
       document.getElementById('screen-start').classList.add('hidden');
       document.getElementById('screen-game').classList.remove('hidden');
+      document.getElementById('current-team-label').innerText = `(ทีม: ${teamName})`;
       updateRoundUI();
     } catch (err) {
       alert('เปิดกล้องไม่ได้! โปรดอนุญาตสิทธิ์การใช้งานกล้องในเบราว์เซอร์');
@@ -149,7 +172,10 @@
     document.getElementById('target-img').src = targetImages[currentRound];
   }
 
-  function takePhoto() {
+  async function takePhoto() {
+    const btn = document.getElementById('btn-take-photo');
+    btn.disabled = true;
+
     const ctx = canvas.getContext('2d');
     canvas.width = 320;
     canvas.height = 320;
@@ -158,11 +184,27 @@
     ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // ย่อไฟล์รูปเป็น JPEG ขนาดจิ๋ว (~15KB) เพื่อให้ส่งผ่านเน็ตได้เร็ว 100%
-    capturedPhotos.push(canvas.toDataURL('image/jpeg', 0.5));
-    
-    currentRound++;
-    updateRoundUI();
+    const photoData = canvas.toDataURL('image/jpeg', 0.5);
+
+    // ส่งรูปขึ้นเซิร์ฟเวอร์ทันที
+    try {
+      await fetch('/api/upload-photo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ teamName, photo: photoData, photoIndex: currentRound })
+      });
+
+      const statusMsg = document.getElementById('photo-status');
+      statusMsg.classList.remove('hidden');
+      setTimeout(() => statusMsg.classList.add('hidden'), 1500);
+
+      currentRound++;
+      updateRoundUI();
+    } catch (err) {
+      alert('เกิดข้อผิดพลาดในการส่งรูปภาพ กรุณาถ่ายใหม่อีกครั้ง');
+    } finally {
+      btn.disabled = false;
+    }
   }
 
   function finishGame() {
@@ -171,35 +213,18 @@
     document.getElementById('screen-finish').classList.remove('hidden');
   }
 
-  async function submitPhotos() {
-    const statusText = document.getElementById('upload-status');
-    const submitBtn = document.getElementById('btn-submit');
-    
-    submitBtn.disabled = true;
-    submitBtn.className = "w-full bg-slate-700 text-slate-400 font-bold py-4 rounded-2xl text-xl cursor-not-allowed mb-4";
-    statusText.innerText = '⏳ กำลังส่งผลงานไปยังระบบครู...';
-    statusText.className = 'text-amber-400 font-medium block mb-4';
-
-    try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ studentName, photos: capturedPhotos })
-      });
-      const data = await res.json();
-      if (data.success) {
-        statusText.innerText = '✅ ส่งรูปภาพขึ้นหน้าจอครูสำเร็จแล้ว!';
-        statusText.className = 'text-emerald-400 font-medium block mb-4';
-      }
-    } catch (err) {
-      statusText.innerText = '❌ ส่งไม่สำเร็จ กรุณากดลองอีกครั้ง';
-      statusText.className = 'text-rose-400 font-medium block mb-4';
-      submitBtn.disabled = false;
-      submitBtn.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl text-xl shadow-lg mb-4";
-    }
-  }
-
+  // ระบบตรวจสอบรหัสผ่านหน้าครู
   function switchTab(tab) {
+    if (tab === 'teacher' && !isTeacherAuthenticated) {
+      const pwd = prompt('🔒 กรุณากรอกรหัสผ่านสำหรับคุณครู:');
+      if (pwd === '1234') {
+        isTeacherAuthenticated = true;
+      } else {
+        alert('❌ รหัสผ่านไม่ถูกต้อง!');
+        return;
+      }
+    }
+
     const isStudent = tab === 'student';
     document.getElementById('student-view').classList.toggle('hidden', !isStudent);
     document.getElementById('teacher-view').classList.toggle('hidden', isStudent);
@@ -220,52 +245,95 @@
     const results = await res.json();
     const gallery = document.getElementById('teacher-gallery');
     gallery.innerHTML = '';
-    
-    document.getElementById('total-students').innerText = `ส่งแล้ว ${results.length} คน`;
 
     if (results.length === 0) {
-      gallery.innerHTML = `<div class="text-center py-12 text-slate-500">ยังไม่มีนักเรียนส่งรูปภาพในขณะนี้...</div>`;
-      return;
+      gallery.innerHTML = `<div id="no-team-msg" class="text-center py-12 text-slate-500">ยังไม่มีทีมส่งผลงานเข้ามา...</div>`;
+    } else {
+      results.forEach(team => renderOrUpdateTeamCard(team));
     }
-
-    results.forEach(item => addSubmissionToTeacherView(item, false));
+    updateTeamCount();
   }
 
-  function addSubmissionToTeacherView(data, isNew = false) {
+  function renderOrUpdateTeamCard(team) {
     const gallery = document.getElementById('teacher-gallery');
-    if (gallery.innerText.includes('ยังไม่มีนักเรียน')) gallery.innerHTML = '';
+    const noMsg = document.getElementById('no-team-msg');
+    if (noMsg) noMsg.remove();
 
-    const card = document.createElement('div');
-    card.className = `bg-slate-800 border ${isNew ? 'border-emerald-500 shadow-lg shadow-emerald-500/20' : 'border-slate-700'} rounded-2xl p-5 transition-all`;
+    let card = document.getElementById(`team-card-${team.id}`);
     
-    card.innerHTML = `
+    const cardHTML = `
       <div class="flex justify-between items-center mb-4">
-        <div class="flex items-center gap-2">
-          <span class="text-xl">👤</span>
-          <h3 class="font-bold text-lg text-white">${data.studentName}</h3>
-          ${isNew ? '<span class="bg-emerald-500 text-xs text-white px-2 py-0.5 rounded-full font-bold animate-pulse">ส่งใหม่!</span>' : ''}
+        <div class="flex items-center gap-3">
+          <span class="text-xl">🏆</span>
+          <h3 class="font-bold text-lg text-white">${team.teamName}</h3>
+          <span class="text-xs text-slate-400">อัปเดตล่าสุด ${team.timestamp}</span>
         </div>
-        <span class="text-xs text-slate-400">${data.timestamp}</span>
+        <div class="flex items-center gap-2">
+          <button onclick="editTeam(${team.id}, '${team.teamName}')" class="bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 text-xs px-3 py-1.5 rounded-lg border border-amber-500/30 transition-all">
+            ✏️ แก้ไขชื่อ
+          </button>
+          <button onclick="deleteTeam(${team.id})" class="bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 text-xs px-3 py-1.5 rounded-lg border border-rose-500/30 transition-all">
+            🗑️ ลบ
+          </button>
+        </div>
       </div>
       <div class="grid grid-cols-5 md:grid-cols-10 gap-2">
-        ${data.photos.map((img, i) => `
-          <div class="group relative aspect-square rounded-lg overflow-hidden bg-slate-900 border border-slate-700">
-            <img src="${img}" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-white font-bold transition-all">
-              ท่าที่ ${i+1}
-            </div>
+        ${team.photos.map((img, i) => `
+          <div class="group relative aspect-square rounded-lg overflow-hidden bg-slate-900 border border-slate-700 flex items-center justify-center">
+            ${img 
+              ? `<img src="${img}" class="w-full h-full object-cover">
+                 <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-white font-bold transition-all">ท่าที่ ${i+1}</div>`
+              : `<span class="text-xs text-slate-600 font-bold">${i+1}</span>`
+            }
           </div>
         `).join('')}
       </div>
     `;
 
-    if (isNew) {
-      gallery.prepend(card);
-      const currentCount = parseInt(document.getElementById('total-students').innerText.replace(/\D/g, '') || 0) + 1;
-      document.getElementById('total-students').innerText = `ส่งแล้ว ${currentCount} คน`;
+    if (card) {
+      card.innerHTML = cardHTML;
     } else {
-      gallery.appendChild(card);
+      card = document.createElement('div');
+      card.id = `team-card-${team.id}`;
+      card.className = "bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg transition-all";
+      card.innerHTML = cardHTML;
+      gallery.prepend(card);
     }
+    updateTeamCount();
+  }
+
+  // ฟังก์ชัน เพิ่ม / แก้ไข / ลบ ของครู
+  async function addTeamManual() {
+    const name = prompt('กรุณากรอกชื่อทีมใหม่:');
+    if (!name) return;
+
+    await fetch('/api/results', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ teamName: name })
+    });
+  }
+
+  async function editTeam(id, currentName) {
+    const newName = prompt('แก้ไขชื่อทีม:', currentName);
+    if (!newName || newName === currentName) return;
+
+    await fetch(`/api/results/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ teamName: newName })
+    });
+  }
+
+  async function deleteTeam(id) {
+    if (!confirm('คุณต้องการลบทีมนี้ออกจากการแข่งขันใช่หรือไม่?')) return;
+
+    await fetch(`/api/results/${id}`, { method: 'DELETE' });
+  }
+
+  function updateTeamCount() {
+    const count = document.getElementById('teacher-gallery').children.length;
+    document.getElementById('total-teams').innerText = `ส่งแล้ว ${count} ทีม`;
   }
 </script>
 </body>
