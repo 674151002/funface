@@ -16,7 +16,6 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen pb-12">
 
-  <!-- Navigation Bar -->
   <header class="max-w-5xl mx-auto pt-6 px-4 flex justify-between items-center">
     <div class="flex items-center space-x-2">
       <span class="text-3xl">🤪</span>
@@ -29,7 +28,7 @@
         🎮 นักเรียน
       </button>
       <button id="btn-tab-teacher" onclick="switchTab('teacher')" class="px-4 py-2 text-sm font-semibold rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-2">
-        👨‍🏫 หน้าจอครู <span id="live-badge" class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+        👨‍🏫 หน้าจอครู <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
       </button>
     </div>
   </header>
@@ -38,12 +37,10 @@
 
     <!-- Section นักเรียน -->
     <div id="student-view">
-      
-      <!-- หน้าแรก: กรอกชื่อ -->
       <div id="screen-start" class="bg-slate-800/80 backdrop-blur border border-slate-700 rounded-3xl p-8 max-w-lg mx-auto text-center shadow-2xl">
         <div class="text-6xl mb-4">📸</div>
         <h2 class="text-3xl font-bold text-white mb-2">เกมถ่ายรูปทำหน้าตลก</h2>
-        <p class="text-slate-400 mb-6">เลียนแบบท่าทาง 10 รูป ภาพละ 10 วินาที พร้อมแล้วกรอกชื่อแล้วกดเริ่มเลย!</p>
+        <p class="text-slate-400 mb-6">ทำหน้าตลกตามรูปต้นแบบ 10 รูป รูปละ 10 วินาที</p>
         
         <input type="text" id="student-name" placeholder="ระบุชื่อ-นามสกุล หรือ เลขที่..." 
                class="w-full bg-slate-900 border border-slate-700 rounded-2xl px-5 py-4 text-center text-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 mb-6 transition-all">
@@ -53,71 +50,63 @@
         </button>
       </div>
 
-      <!-- หน้าถ่ายรูป -->
       <div id="screen-game" class="hidden">
-        <!-- Status & Timer -->
         <div class="flex justify-between items-center mb-6 bg-slate-800/60 border border-slate-700 p-4 rounded-2xl">
           <div class="flex items-center gap-3">
             <span class="bg-indigo-500/20 text-indigo-400 px-4 py-1.5 rounded-full font-bold border border-indigo-500/30 text-lg" id="round-text">
               1 / 10
             </span>
-            <span class="text-slate-400 text-sm hidden sm:inline">เกร็งหน้าค้างไว้รอชัตเตอร์!</span>
+            <span class="text-slate-400 text-sm hidden sm:inline">ทำหน้าให้เหมือนแล้วค้างไว้!</span>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-xs uppercase text-slate-400 font-bold tracking-wider">เหลือเวลา</span>
+            <span class="text-xs uppercase text-slate-400 font-bold tracking-wider">นับถอยหลัง</span>
             <div id="timer-text" class="text-4xl font-extrabold text-rose-500 bg-rose-500/10 px-4 py-1 rounded-xl border border-rose-500/20 animate-pulse-fast">
               10
             </div>
           </div>
         </div>
 
-        <!-- Camera Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="bg-slate-800 border border-slate-700 rounded-3xl p-4 text-center shadow-xl">
-            <h3 class="text-slate-400 font-semibold mb-3 flex items-center justify-center gap-2">🎯 ท่าต้นแบบ</h3>
-            <div class="relative aspect-video md:aspect-square rounded-2xl overflow-hidden bg-slate-900 border border-slate-700">
-              <img id="target-img" src="" class="w-full h-full object-cover">
+            <h3 class="text-slate-400 font-semibold mb-3">🎯 ท่าต้นแบบ</h3>
+            <div class="relative aspect-square rounded-2xl overflow-hidden bg-slate-900 border border-slate-700 flex items-center justify-center p-2">
+              <img id="target-img" src="" class="max-w-full max-h-full object-contain">
             </div>
           </div>
 
           <div class="bg-slate-800 border border-slate-700 rounded-3xl p-4 text-center shadow-xl">
-            <h3 class="text-slate-400 font-semibold mb-3 flex items-center justify-center gap-2">📸 กล้องของคุณ</h3>
-            <div class="relative aspect-video md:aspect-square rounded-2xl overflow-hidden bg-slate-900 border border-slate-700">
+            <h3 class="text-slate-400 font-semibold mb-3">📸 กล้องของคุณ</h3>
+            <div class="relative aspect-square rounded-2xl overflow-hidden bg-slate-900 border border-slate-700">
               <video id="webcam" autoplay playsinline muted class="w-full h-full object-cover mirror"></video>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- หน้าแสดงผลเสร็จสิ้น -->
       <div id="screen-finish" class="hidden bg-slate-800 border border-slate-700 rounded-3xl p-8 max-w-lg mx-auto text-center">
         <div class="text-6xl mb-4">🎉</div>
         <h2 class="text-3xl font-bold text-white mb-2">ถ่ายครบ 10 ท่าแล้ว!</h2>
-        <p id="upload-status" class="text-emerald-400 font-medium mb-6">⚡ กำลังส่งผลงานไปยังหน้าจอครู...</p>
+        <p id="upload-status" class="text-amber-400 font-medium mb-6">⏳ กำลังส่งผลงานไปยังระบบครู...</p>
         <button onclick="location.reload()" class="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-6 py-3 rounded-xl transition-all">
           🔄 เล่นใหม่อีกครั้ง
         </button>
       </div>
-
     </div>
 
-    <!-- Section ครู (Real-time Dashboard) -->
+    <!-- Section ครู -->
     <div id="teacher-view" class="hidden">
       <div class="flex justify-between items-center mb-6">
         <div>
           <h2 class="text-2xl font-bold text-white flex items-center gap-2">
-            📊 ผลงานนักเรียน <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-normal border border-emerald-500/30">Real-time Active</span>
+            📊 ผลงานนักเรียน <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-normal border border-emerald-500/30">Real-time</span>
           </h2>
-          <p class="text-slate-400 text-sm">รูปภาพจะอัปเดตเด้งขึ้นหน้าจอนี้ทันทีเมื่อเด็กถ่ายเสร็จ</p>
         </div>
         <div id="total-students" class="bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl text-slate-300 font-semibold">
           ส่งแล้ว 0 คน
         </div>
       </div>
 
-      <div id="teacher-gallery" class="space-y-6">
-        <!-- การ์ดรูปถ่ายของเด็กจะเพิ่มเข้ามาตรงนี้แบบอัตโนมัติ -->
-      </div>
+      <div id="teacher-gallery" class="space-y-6"></div>
     </div>
 
   </main>
@@ -136,10 +125,8 @@
   const video = document.getElementById('webcam');
   const canvas = document.getElementById('canvas');
 
-  // โหลดรูปต้นแบบ
   fetch('/api/targets').then(r => r.json()).then(data => targetImages = data);
 
-  // เชื่อมต่อ Real-time สำหรับหน้าจอครู
   socket.on('new_submission', (data) => {
     addSubmissionToTeacherView(data, true);
   });
@@ -185,14 +172,15 @@
 
   function takePhoto() {
     const ctx = canvas.getContext('2d');
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
+    canvas.width = 640;
+    canvas.height = 480;
 
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    capturedPhotos.push(canvas.toDataURL('image/png'));
+    // บีบอัดภาพเป็น JPEG ความละเอียด 60% เพื่อลดขนาดไฟล์
+    capturedPhotos.push(canvas.toDataURL('image/jpeg', 0.6));
     currentRound++;
     nextRound();
   }
@@ -203,19 +191,23 @@
     document.getElementById('screen-game').classList.add('hidden');
     document.getElementById('screen-finish').classList.remove('hidden');
 
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentName, photos: capturedPhotos })
-    });
-    const data = await res.json();
-    
-    if (data.success) {
-      document.getElementById('upload-status').innerText = '✅ ส่งรูปภาพขึ้นหน้าจอครูเรียบร้อยแล้ว!';
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentName, photos: capturedPhotos })
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('upload-status').innerText = '✅ ส่งรูปภาพขึ้นหน้าจอครูเรียบร้อยแล้ว!';
+        document.getElementById('upload-status').className = 'text-emerald-400 font-medium mb-6';
+      }
+    } catch (err) {
+      document.getElementById('upload-status').innerText = '❌ ส่งรูปไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+      document.getElementById('upload-status').className = 'text-rose-400 font-medium mb-6';
     }
   }
 
-  // Switch Tab
   function switchTab(tab) {
     const isStudent = tab === 'student';
     document.getElementById('student-view').classList.toggle('hidden', !isStudent);
@@ -232,7 +224,6 @@
     if (!isStudent) loadTeacherData();
   }
 
-  // โหลดข้อมูลภาพทั้งหมดฝั่งครู
   async function loadTeacherData() {
     const res = await fetch('/api/results');
     const results = await res.json();
@@ -251,19 +242,17 @@
 
   function addSubmissionToTeacherView(data, isNew = false) {
     const gallery = document.getElementById('teacher-gallery');
-    
-    // ลบข้อความว่างเปล่าออก
     if (gallery.innerText.includes('ยังไม่มีนักเรียน')) gallery.innerHTML = '';
 
     const card = document.createElement('div');
-    card.className = `bg-slate-800 border ${isNew ? 'border-emerald-500 shadow-lg shadow-emerald-500/10' : 'border-slate-700'} rounded-2xl p-5 transition-all`;
+    card.className = `bg-slate-800 border ${isNew ? 'border-emerald-500 shadow-lg shadow-emerald-500/20' : 'border-slate-700'} rounded-2xl p-5 transition-all`;
     
     card.innerHTML = `
       <div class="flex justify-between items-center mb-4">
         <div class="flex items-center gap-2">
           <span class="text-xl">👤</span>
           <h3 class="font-bold text-lg text-white">${data.studentName}</h3>
-          ${isNew ? '<span class="bg-emerald-500 text-xs text-white px-2 py-0.5 rounded-full font-bold animate-pulse">ใหม่ล่าสุด!</span>' : ''}
+          ${isNew ? '<span class="bg-emerald-500 text-xs text-white px-2 py-0.5 rounded-full font-bold animate-pulse">ส่งใหม่!</span>' : ''}
         </div>
         <span class="text-xs text-slate-400">${data.timestamp}</span>
       </div>
@@ -280,7 +269,7 @@
     `;
 
     if (isNew) {
-      gallery.prepend(card); // เอาข้อมูลใหม่ไปวางไว้บนสุด
+      gallery.prepend(card);
       const currentCount = parseInt(document.getElementById('total-students').innerText.replace(/\D/g, '') || 0) + 1;
       document.getElementById('total-students').innerText = `ส่งแล้ว ${currentCount} คน`;
     } else {
