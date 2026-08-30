@@ -17,16 +17,22 @@ app.use(express.json({ limit: '100mb' }));
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// สรรสร้างระบบฐานข้อมูลแบบง่ายด้วยไฟล์ JSON
 const DB_FILE = path.join(__dirname, 'results.json');
-let studentResults = [];
+let teamResults = [];
 
-// ดึงข้อมูลเก่าขึ้นมาถ้ามีไฟล์เซฟไว้
 if (fs.existsSync(DB_FILE)) {
   try {
-    studentResults = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+    teamResults = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
   } catch (e) {
-    studentResults = [];
+    teamResults = [];
+  }
+}
+
+function saveDB() {
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(teamResults, null, 2));
+  } catch (err) {
+    console.error('Save DB error:', err);
   }
 }
 
@@ -44,33 +50,75 @@ const targetImages = [
 ];
 
 app.get('/api/targets', (req, res) => res.json(targetImages));
-app.get('/api/results', (req, res) => res.json(studentResults));
+app.get('/api/results', (req, res) => res.json(teamResults));
 
-app.post('/api/upload', (req, res) => {
-  const { studentName, photos } = req.body;
-  if (!studentName || !photos || photos.length === 0) {
+// ส่งรูปภาพทีละ 1 รูปทันทีแบบ Real-time
+app.post('/api/upload-photo', (req, res) => {
+  const { teamName, photo, photoIndex } = req.body;
+  if (!teamName || !photo) {
     return res.status(400).json({ success: false, message: 'ข้อมูลไม่ครบถ้วน' });
   }
 
-  const record = {
-    id: Date.now(),
-    studentName,
-    timestamp: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
-    photos
-  };
-
-  studentResults.unshift(record);
-
-  // บันทึกลงฐานข้อมูลไฟล์ JSON
-  try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(studentResults, null, 2));
-  } catch (err) {
-    console.error('Save error:', err);
+  let team = teamResults.find(t => t.teamName === teamName);
+  if (!team) {
+    team = {
+      id: Date.now(),
+      teamName,
+      timestamp: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+      photos: Array(10).fill(null)
+    };
+    teamResults.unshift(team);
   }
 
-  // ยิง Real-time ตรงหาหน้าจอครู
-  io.emit('new_submission', record);
+  team.photos[photoIndex] = photo;
+  team.timestamp = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+  saveDB();
 
+  io.emit('team_updated', team);
+  res.json({ success: true, team });
+});
+
+// เพิ่มทีมใหม่โดยครู
+app.post('/api/results', (req, res) => {
+  const { teamName } = req.body;
+  if (!teamName) return res.status(400).json({ success: false });
+
+  const newTeam = {
+    id: Date.now(),
+    teamName,
+    timestamp: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+    photos: Array(10).fill(null)
+  };
+  teamResults.unshift(newTeam);
+  saveDB();
+
+  io.emit('team_added', newTeam);
+  res.json({ success: true, team: newTeam });
+});
+
+// แก้ไขชื่อทีม
+app.put('/api/results/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const { teamName } = req.body;
+  const team = teamResults.find(t => t.id === id);
+  
+  if (team) {
+    team.teamName = teamName;
+    saveDB();
+    io.emit('team_updated', team);
+    res.json({ success: true });
+  } else {
+    res.status(404).json({ success: false });
+  }
+});
+
+// ลบทีม
+app.delete('/api/results/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  teamResults = teamResults.filter(t => t.id !== id);
+  saveDB();
+
+  io.emit('team_deleted', id);
   res.json({ success: true });
 });
 
